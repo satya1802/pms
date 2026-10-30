@@ -7,7 +7,22 @@ _No routes found._
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
-_Code matches the designed API._
+**Designed but missing:**
+
+- DELETE /departments/{id}
+- DELETE /employees/{id}
+- GET /departments
+- GET /employees
+- GET /employees/{id}
+- PATCH /admin/users/{id}
+- POST /admin/users
+- POST /auth/login
+- POST /auth/logout
+- POST /auth/password-reset
+- POST /departments
+- POST /employees
+- POST /employees/{id}/photo
+- PUT /employees/{id}
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->

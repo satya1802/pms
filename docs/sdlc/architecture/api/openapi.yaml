@@ -2,6 +2,332 @@
 openapi: 3.1.0
 info:
   title: PMS
-  version: architecture-v0
+  version: architecture-v1
   description: Designed API from the approved architecture (not extracted from code).
-paths: {}
+paths:
+  /admin/users:
+    post:
+      summary: Administrator provisions an HR/admin account with email and role; triggers
+        a setup email.
+      description: Administrator provisions an HR/admin account with email and role;
+        triggers a setup email.
+      operationId: post_admin_users
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, role}'
+      responses:
+        '200':
+          description: '{id, email, role}'
+      security:
+      - bearerAuth: []
+  /admin/users/{id}:
+    patch:
+      summary: Revoke or reactivate an HR/admin account.
+      description: Revoke or reactivate an HR/admin account.
+      operationId: patch_admin_users_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{is_active}'
+      responses:
+        '200':
+          description: '{id, is_active}'
+      security:
+      - bearerAuth: []
+  /auth/login:
+    post:
+      summary: Authenticate email/password and issue a JWT; returns a single generic
+        error on mismatch.
+      description: Authenticate email/password and issue a JWT; returns a single generic
+        error on mismatch.
+      operationId: post_auth_login
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, password}'
+      responses:
+        '200':
+          description: '{access_token, token_type, role}'
+  /auth/logout:
+    post:
+      summary: End the current session so it cannot be reused.
+      description: End the current session so it cannot be reused.
+      operationId: post_auth_logout
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: none
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /auth/password-reset:
+    post:
+      summary: Send a password-reset email via SMTP.
+      description: Send a password-reset email via SMTP.
+      operationId: post_auth_password_reset
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email}'
+      responses:
+        '200':
+          description: '202'
+  /departments:
+    get:
+      summary: List departments for browsing and filtering.
+      description: List departments for browsing and filtering.
+      operationId: get_departments
+      parameters: []
+      responses:
+        '200':
+          description: '[{id,name,employee_count}]'
+      security:
+      - bearerAuth: []
+    post:
+      summary: HR/admin creates a department.
+      description: HR/admin creates a department.
+      operationId: post_departments
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{name}'
+      responses:
+        '200':
+          description: '{id,name}'
+      security:
+      - bearerAuth: []
+  /departments/{id}:
+    delete:
+      summary: HR/admin deletes a department; refused if it still has assigned employees.
+      description: HR/admin deletes a department; refused if it still has assigned
+        employees.
+      operationId: delete_departments_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 204 or 409
+      security:
+      - bearerAuth: []
+  /employees:
+    get:
+      summary: Search and browse the directory by name/title/department with pagination
+        and department filter.
+      description: Search and browse the directory by name/title/department with pagination
+        and department filter.
+      operationId: get_employees
+      parameters: []
+      responses:
+        '200':
+          description: '{items:[{id,name,job_title,photo_url}], total, page}'
+      security:
+      - bearerAuth: []
+    post:
+      summary: HR/admin creates an employee record with validation and unique work
+        email.
+      description: HR/admin creates an employee record with validation and unique
+        work email.
+      operationId: post_employees
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{name,job_title,department_id,work_email,phone,manager_id,location,start_date}'
+      responses:
+        '200':
+          description: '{id,...}'
+      security:
+      - bearerAuth: []
+  /employees/{id}:
+    get:
+      summary: View full employee profile including manager and direct reports.
+      description: View full employee profile including manager and direct reports.
+      operationId: get_employees_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{id,name,photo_url,job_title,department,work_email,phone,manager,location,start_date,direct_reports}'
+      security:
+      - bearerAuth: []
+    put:
+      summary: HR/admin updates an employee record with the same validation.
+      description: HR/admin updates an employee record with the same validation.
+      operationId: put_employees_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{name,job_title,department_id,work_email,phone,manager_id,location,start_date}'
+      responses:
+        '200':
+          description: '{id,...}'
+      security:
+      - bearerAuth: []
+    delete:
+      summary: HR/admin removes a record and clears dangling reporting lines after
+        confirmation.
+      description: HR/admin removes a record and clears dangling reporting lines after
+        confirmation.
+      operationId: delete_employees_id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /employees/{id}/photo:
+    post:
+      summary: HR/admin uploads/replaces a photo stored in S3 after type/size validation.
+      description: HR/admin uploads/replaces a photo stored in S3 after type/size
+        validation.
+      operationId: post_employees_id_photo
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: multipart image file
+      responses:
+        '200':
+          description: '{photo_url}'
+      security:
+      - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    users:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        password_hash:
+          type: string
+        role:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - email
+      - password_hash
+      - role
+      - is_active
+      - created_at
+    departments:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+      - created_at
+    employees:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        job_title:
+          type: string
+        department_id:
+          type: string
+          format: uuid
+        work_email:
+          type: string
+        phone:
+          type: string
+        manager_id:
+          type: string
+          format: uuid
+        location:
+          type: string
+        start_date:
+          type: string
+          format: date
+        photo_key:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+      - work_email
+      - created_at
+      - updated_at
